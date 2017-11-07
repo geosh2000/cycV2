@@ -74,6 +74,7 @@ import { CxcAdminComponent } from './components/reportes/cxc/cxc-admin.component
 import { CorteComponent } from './components/reportes/cxc/corte.component';
 import { NoAcentosPipe } from './pipes/no-acentos.pipe';
 import { UploadImageComponent } from './components/formularios/upload-image.component';
+import { TableTemplateComponent } from './addon/table-template/table-template.component';
 
 
 declare let jQuery : Object;
@@ -130,7 +131,8 @@ declare let jQuery : Object;
     CxcAdminComponent,
     CorteComponent,
     NoAcentosPipe,
-    UploadImageComponent
+    UploadImageComponent,
+    TableTemplateComponent
   ],
   imports: [
     BrowserModule,

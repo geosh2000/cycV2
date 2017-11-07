@@ -62,14 +62,15 @@
       {{ errorMsg | json }}
     </div>
     <hr>
-      <ng2-smart-table
+      <!-- <ng2-smart-table
                 id='listCxc'
                 (edit)="viewDetails($event)"
                 class='table-responsive table-striped'
                 [settings]="smartTableSettings"
                 [source]="listCxc"
                 >
-      </ng2-smart-table>
+      </ng2-smart-table> -->
+      <app-table-template id='listCxc'></app-table-template>
 
 
 
@@ -94,7 +95,7 @@
         <div class="modal-body" *ngIf="actualCxcReady && checkCredential('cxc_registro')">
           <div class="d-flex justify-content-around">
             <button type="button" class="btn btn-outline-warning" *ngIf="actualCxc['status'] == 0" (click)="editCxc()">Editar</button>
-            <button type="button" class="btn btn-outline-primary" *ngIf="actualCxc['status'] == 0 && !editFlag" (click)="changeStatus(1)">Enviarss a RRHH  <i class="fa fa-spinner fa-pulse fa-fw" *ngIf="submitting"></i></button>
+            <button type="button" class="btn btn-outline-primary" *ngIf="actualCxc['status'] == 0 && !editFlag" (click)="changeStatus(1)">Enviar a RRHH  <i class="fa fa-spinner fa-pulse fa-fw" *ngIf="submitting"></i></button>
           </div>
           <hr>
           <div class="alert alert-danger" role="alert" *ngIf="actualCxc['status'] >= 1">
@@ -193,3 +194,18 @@
 </div>
 
 <app-upload-image (loadResult)="upldCheck( $event )"></app-upload-image>
+<!-- Modal -->
+<div class="modal fade" id="showDocument" tabindex="-1" role="dialog" aria-labelledby="showDocumentLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <img alt='image' class='img rounded img-fluid' style='margin: auto;' [src]="documentImage" (error)="updateImg($event)" id="shownDocument">
+      </div>
+      <div class="modal-footer">
+        <div class="d-flex justify-content-end">
+          <div class='p-2'><button class="btn btn-danger" (click)="deleteImage()" [disabled]="deleting">Borrar <i class="fa fa-fw fa-trash"></i> <i class="fa fa-fw fa-spinner fa-pulse" *ngIf="deleting"></i></button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

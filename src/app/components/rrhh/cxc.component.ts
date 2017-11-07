@@ -5,6 +5,7 @@ import { DaterangepickerConfig, DaterangePickerComponent } from 'ng2-daterangepi
 import { ToastsManager, ToastOptions } from 'ng2-toastr/ng2-toastr';
 
 import {ApplyCxcComponent} from '../formularios/apply-cxc.component';
+import {TableTemplateComponent} from '../../addon/table-template/table-template.component';
 
 import { Ng2SmartTableModule, LocalDataSource, ViewCell } from 'ng2-smart-table';
 
@@ -34,9 +35,12 @@ export class CxcComponent implements OnInit {
   @ViewChild( ApplyCxcComponent ) _applyCxc:ApplyCxcComponent
   @ViewChild( AgregarCxcComponent ) addCxc:AgregarCxcComponent
   @ViewChild( UploadImageComponent ) _image:UploadImageComponent
+  @ViewChild( TableTemplateComponent ) _table:TableTemplateComponent
 
   showContents:boolean = false
   mainCredential:string = 'cxc_read'
+
+  windowInHeight:any
 
   nameAsesor:string
   addedMsg:string
@@ -56,6 +60,9 @@ export class CxcComponent implements OnInit {
 
   eventLog:any
   actualCxc:any
+  documentImage:any
+  imageTitle:any
+  deleting:boolean = false
 
   formEditCxc:FormGroup
 
@@ -67,84 +74,6 @@ export class CxcComponent implements OnInit {
   searchStart:any = moment()
   searchEnd:any
 
-  smartTableSettings = {
-    columns: {
-      id: { title: 'id'},
-      NombreAsesor: { title: 'NombreAsesor'},
-      fecha_cxc: { title: 'Fecha CxC'},
-      tipoOK: { title: 'Tipo'},
-      monto: { title: 'Monto'},
-      localizador: {
-                      title:  'Localizador',
-                      type:   'html',
-                      valuePrepareFunction: function(cell, row){
-                        let show = `<a href="https://rsv.pricetravel.com.mx/reservations/show/${ cell }" target='_blank'>${ cell }</a>`
-                        return show
-                      }
-                    },
-      fecha_aplicacion: { title: 'Fecha Aplicacion'},
-      firmado: {
-                      title:  'Firmado',
-                      type:   'html',
-                      valuePrepareFunction: function(cell, row){
-
-                        let show
-                        let view
-
-                        if( row.fileExist ){
-                          view = `<span class="p-1 badge badge-primary" style="cursor: pointer" (click)="showFormat(${ row.id })" ><i class='fa fa-fw fa-eye'></i></span>`
-                        }else{
-                          view = `<span class="p-1 badge badge-warning" style="cursor: pointer" (click)="showFormat(${ row.id })" ><i class='fa fa-fw fa-upload'></i></span>`
-                        }
-
-                        if( cell == 1){
-                          show = `<span class="p-1 badge badge-success">Firmado</span>`
-                        }else{
-                          show = `<span class="p-1 badge badge-danger">No Firmado</span>`
-                        }
-
-                        return `<div class='d-flex justify-content-between'>${ show } ${ view }</div>`
-                      }
-                    },
-      comments: { title: 'Comentarios'},
-      NombreCreador: { title: 'Creador'},
-      date_created: { title: 'Fecha Creación'},
-      last_update: { title: 'Ultima actualización'},
-      NombreAplicador: { title: 'Actualizado Por'},
-      status: {
-                      title:  'Status',
-                      type:   'html',
-                      valuePrepareFunction: function(cell, row){
-
-                        let show
-
-                        switch( cell ){
-                          case '0':
-                            show = `<span class="badge badge-danger">Pendiente Envío</span>`
-                            break;
-                          case '1':
-                            show = `<span class="badge badge-info">En Espera de RRHH</span>`
-                            break;
-                          case '2':
-                            show = `<span class="badge badge-success">Aplicado</span>`
-                            break;
-                        }
-
-                        return show
-                      }
-                    },
-    },
-    mode: 'external',
-    actions: {
-      add: false,
-      edit: true,
-      delete: false
-    },
-    pager: {
-      perPage: 50000000
-    }
-  }
-
   public multiPicker = {
     showDropdowns: true,
     opens: "left"
@@ -154,6 +83,27 @@ export class CxcComponent implements OnInit {
    searchStrName:string;
    asesorSelected:string;
    dataServiceName:CompleterData;
+
+   confTable:any
+
+   rulesTable:any = {
+     firmado: {
+                1:        {cell: 'Firmado',    style: 'badge badge-success',  faClass: ''},
+                0:        {cell: 'No Firmado', style: 'badge badge-danger',   faClass: ''},
+                default:  {cell: 'Otro',       style: 'badge badge-secondary',faClass: ''}
+              },
+     status:  {
+                0:        {cell: 'En Revisión',       style: 'badge badge-danger',  faClass: ''},
+                1:        {cell: 'En espera de RRHH', style: 'badge badge-info',    faClass: ''},
+                2:        {cell: 'Aplicado',          style: 'badge badge-success', faClass: ''},
+                default:  {cell: 'Otro',              style: 'badge badge-secondary', faClass: ''}
+              },
+     fileExist:  {
+                0:        {cell: 'Cargar',            style: 'btn btn-sm btn-warning',  faClass: 'fa fa-fw fa-upload'},
+                1:        {cell: 'Ver',               style: 'btn btn-sm btn-info',     faClass: 'fa fa-fw fa-eye'},
+                default:  {cell: 'Otro',              style: 'btn btn-sm btn-warning',  faClass: 'fa fa-fw fa-times'}
+              }
+   }
 
 
   constructor(
@@ -166,6 +116,44 @@ export class CxcComponent implements OnInit {
     this.currentUser = this._init.getUserInfo()
     this.showContents = this._init.checkCredential( this.mainCredential, true )
 
+    this.confTable = {
+      id:                { title: 'ID',            style: 'btn btn-sm btn-primary', cell: '', faShow: true,  faOnly: false, faClass: 'fa fa-fw fa-pencil', show: true,  type: 'button',
+                            click: (row, cell)=>{
+                              this.viewDetails( row )
+                            }},
+      asesor:            { title: 'Asesor',        style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: false, type: 'span' },
+      NombreAsesor:      { title: 'NombreAsesor',  style: 'text-left', cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      fecha_cxc:         { title: 'Fecha CxC',     style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      tipoOK:            { title: 'Tipo',          style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      monto:             { title: 'Monto',         style: '',   cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span',
+                            custom( val ){
+                              let result:any = +val
+                              result = result.toLocaleString()
+                              return `$${result}`
+                            }
+                          },
+      localizador:       { title: 'Localizador',   style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'a', link: "https://rsv.pricetravel.com.mx/reservations/show/" },
+      fecha_aplicacion:  { title: 'Fecha Aplicacion', style: '',       cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      fileExist:         { title: 'Documento',     style: '',          cell: '', faShow: true,  faOnly: false, faClass: '', show: true,  type: 'button',
+                           click: ( row, cell )=>{
+                               if(cell == 0){
+                                 this._image.build(`Subir Documento de CXC: ${row['id']}`, 'cxc', row['id'])
+                               }else{
+                                 let d = new Date()
+                                 this.documentImage=`${Globals.APISERV}/img/cxc/${row['id']}.jpg?${d.getTime()}`
+                                 this.imageTitle = row['id']
+                                 jQuery('#showDocument').modal('show')
+                               }
+                             }},
+      firmado:           { title: 'Doc Firmado',   style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      comments:          { title: 'Comentarios',   style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      NombreCreador:     { title: 'Creador',       style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      date_created:      { title: 'Fecha Creación',style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      last_update:       { title: 'Ultima actualización',style: '',    cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      NombreAplicador:   { title: 'Actualizado Por',style: '',         cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' },
+      status:            { title: 'Status',        style: '',          cell: '', faShow: false, faOnly: false, faClass: '', show: true,  type: 'span' }
+    }
+
     let now = moment()
     this.searchEnd = now.format("YYYY-MM-DD")
 
@@ -173,6 +161,7 @@ export class CxcComponent implements OnInit {
       this.dataServiceName = this.completerService.remote(`${ Globals.APISERV }/ng2/json/listAsesores.json.php?tipo=name&token=${this.currentUser.token}&usn=${this.currentUser.username}&udn=${ this.currentUser.hcInfo['hc_udn']}&puesto=${ this.currentUser.hcInfo['hc_puesto_clave'] }&area=${ this.currentUser.hcInfo['hc_area'] }&dep=${ this.currentUser.hcInfo['hc_dep'] }&viewAll=${ this.currentUser.credentials['view_all_agents'] }&term=`, 'name,user,ncorto', 'name')
     }
 
+    this.windowInHeight = (Math.floor(window.innerHeight*0.8)) + 'px'
 
 
     this.formEditCxc = new FormGroup({
@@ -212,6 +201,7 @@ export class CxcComponent implements OnInit {
               if(res['status']){
 
                 this.listCxc = res['data']
+                this._table.build( this.confTable, this.listCxc, this.rulesTable )
 
               }else{
                 this.errorFlag = true
@@ -229,8 +219,27 @@ export class CxcComponent implements OnInit {
   toXls( sheets, title ){
 
     let wb = utils.table_to_book(document.getElementById(sheets), {raw: true});
+    // console.log(wb)
+
+    for(let index in wb.Sheets['Sheet1']){
+      if( index.match( /^[A,E,F]([1-9][0-9]+|[2-9])$/ )){
+        if( index.match( /^[A][0-9]+$/ ) ){
+          wb.Sheets['Sheet1'][index].v = wb.Sheets['Sheet1'][index].v.substr(1,100)
+        }else if( index.match( /^[E][0-9]+$/ ) ){
+          wb.Sheets['Sheet1'][index].v = wb.Sheets['Sheet1'][index].v.substr(1,100).replace(',','')
+        }else{
+          wb.Sheets['Sheet1'][index].v = wb.Sheets['Sheet1'][index].v.substr(0,100)
+        }
+        wb.Sheets['Sheet1'][index].t = 'n'
+      }
+    }
+
+    console.log(wb)
+
     let wbout = write(wb, { bookType: 'xlsx', bookSST: true, type:
 'binary' });
+
+    // console.log(wb)
 
     saveAs(new Blob([this.s2ab(wbout)], { type: 'application/octet-stream' }), `${title}.xlsx`)
   }
@@ -247,8 +256,8 @@ export class CxcComponent implements OnInit {
         this.eventLog += '\nEvent Fired: ' + e.event.type;
     }
 
-    viewDetails( event ){
-      this.actualCxc = event.data
+    viewDetails( cxc ){
+      this.actualCxc = cxc
       this.actualCxcReady = true
       this.editFlag = false
       this.applyFlag= false
@@ -256,7 +265,7 @@ export class CxcComponent implements OnInit {
       jQuery('#editCXC').modal('show')
     }
 
-    editCxc(){
+    editCxc( cxc ){
       this.formEditCxc.controls['id'].setValue(this.actualCxc['id'])
       this.formEditCxc.controls['monto'].setValue(this.actualCxc['monto'])
       this.formEditCxc.controls['applier'].setValue(this.currentUser.hcInfo['id'])
@@ -354,5 +363,38 @@ export class CxcComponent implements OnInit {
     showFormat( id ){
       console.log( id )
     }
+
+    upldCheck( event ){
+      if(event.ERR){
+        this.toastr.error( event.msg, 'Error!')
+      }else{
+        this.toastr.success( event.msg, 'Success!')
+        this.getCxc(this.searchStart, this.searchEnd)
+      }
+    }
+
+    deleteImage(){
+      this.deleting = true
+
+      this._api.restfulDelete( `cxc/${this.imageTitle}/jpg`, 'UploadImage/imageDel' )
+              .subscribe( res => {
+                if(res.ERR){
+                  this.toastr.error( res.msg, 'Error!')
+                }else{
+                  this.toastr.success( res.msg, 'Borrado')
+                  jQuery('#showDocument').modal('hide')
+                  this.getCxc(this.searchStart, this.searchEnd)
+                }
+                this.deleting = false
+              })
+    }
+
+    updateImg(event){
+      let d = new Date()
+      if(this.imageTitle != null){
+        this.documentImage=`${Globals.APISERV}/img/asesores/${this.imageTitle}.jpg?${d.getTime()}`
+      }
+    }
+
 
 }
