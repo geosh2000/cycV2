@@ -88,9 +88,9 @@
         </div>
         <div class="alert alert-danger" role="alert" *ngIf="saveAlert">
           <span><strong>Hubo un error en el proceso</strong></span><br>
-          <span>
-            {{ errorMsg }}
-          </span><br>
+          <pre>
+            {{ errorMsg | json }}
+          </pre><br>
           <span>Por favor notifícalo a WFM</span>
         </div>
       </form>

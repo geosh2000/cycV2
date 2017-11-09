@@ -166,16 +166,18 @@ export class AddExternalUserComponent implements OnInit {
     this._api.restfulPut( this.formExternalUser.value, "Config/addExternal" )
             .subscribe( res => {
               this.submitting = false
-              if( res['status'] ){
+              if( res.ERR ){
 
-                this.toastr.success("Usuario guardado correctamente", 'Guardado!');
-                this.formExternalUser.reset()
+                this.saveAlert = true
+                this.errorMsg = res.error
+                this.toastr.error( res.error , 'Error!');
+                console.error( res )
 
               }else{
-                this.saveAlert = true
-                this.errorMsg = `code: ${res['msg'].code} error: ${res['msg'].message}`
-                this.toastr.error(`code: ${res['msg'].code} error: ${res['msg'].message}`, 'Error!');
-                console.error( res )
+
+                this.toastr.success( res.msg , 'Guardado!');
+                this.formExternalUser.reset()
+
               }
             })
   }
