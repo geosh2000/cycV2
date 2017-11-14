@@ -1,8 +1,20 @@
 <div class="container-fluid">
   <h1 *ngIf="loading">Cargando <i class="fa fa-fw fa-spinner fa-pulse"></i></h1>
   <ng-container *ngIf="dataCxcs">
-
-    <table class="table table-sm table-responsive-sm table-bordered table-striped table-hover">
+    <div>
+      <button type="button" class="btn btn-sm" [ngClass]="{'btn-info': allChecked, 'btn-outline-info': !allChecked}" (click)="selectAll()">
+        <span *ngIf="allChecked">Borrar Selección</span>
+        <span *ngIf="!allChecked">Seleccionar Todo</span>
+      </button>
+      <button type="button" class="btn btn-sm" (click)="chgStatusMulti(true)" [ngClass]="{'btn-outline-secondary': !checkedNum>0, 'btn-outline-success': checkedNum>0}" [disabled]="!checkedNum>0">
+        <span>Cobrado <i class="fa fa-fw fa-spinner fa-pulse" *ngIf="chgLoading[0]"></i></span>
+      </button>
+      <button type="button" class="btn btn-sm" (click)="chgStatusMulti(false)" [ngClass]="{'btn-outline-secondary': !checkedNum>0, 'btn-outline-danger': checkedNum>0}" [disabled]="!checkedNum>0">
+        <span>Sin Cobrar <i class="fa fa-fw fa-spinner fa-pulse" *ngIf="chgLoading[0]"></i></span>
+      </button>
+    </div>
+    <br>
+    <table class="table table-sm table-responsive-sm table-bordered table-striped table-hover" style="font-size: smaller" id='listCxc'>
       <thead>
         <tr>
           <th class="text-center" scope="col" *ngFor="let field of dataCxcs[0] | keys">{{ field | capitalizado }}</th>
@@ -17,8 +29,8 @@
                 class='text-center border-0'
                 *ngIf="field == 'sel'">
                   <span class="d-flex justify-content-between">
-                    <input type="checkbox" [(ngModel)]="dataCxcs[i].sel">
-                    <i class="text-primary fa fa-fw fa-pencil-square-o text-blue" style="cursor: pointer"></i>
+                    <div><input type="checkbox" class='cxc-check' (change)="checkBuilder(item.id, $event.target.checked)"></div>
+                    <div><button class="btn btn-sm btn-primary" style="font-size: smaller" (click)="editCxc(i)"><i class="fa fa-fw fa-pencil-square-o" style="cursor: pointer"></i></button></div>
                   </span>
             </th>
             <td style="vertical-align: middle"
@@ -28,30 +40,73 @@
               <ng-container *ngIf="!field.includes('monto')">
                 <span [ngSwitch]="field">
                   <div *ngSwitchCase="'cxc_Status'">
-                    <span [ngSwitch]="item[field]">
-                      <div *ngSwitchCase="1"><span class="badge badge-Primary">Enviado a RRHH</span></div>
-                      <div *ngSwitchCase="0"><span class="badge badge-danger">En revisión</span></div>
-                      <div *ngSwitchCase="2"><span class="badge badge-success">Aplicado</span></div>
-                      <div *ngSwitchDefault><span class="badge badge-secondary">Otro</span></div>
-                    </span>
+                    <button class="btn btn-sm"
+                      [ngClass]="{
+                          'btn-danger': item[field]==0,
+                          'btn-primary': item[field]==1,
+                          'btn-success': item[field]==2,
+                          'btn-secondary': item[field]>2}"
+                      style="font-size: smaller"
+                      [ngSwitch]="item[field]">
+                      <span *ngSwitchCase="0">En revisión</span>
+                      <span *ngSwitchCase="1">Enviado a RRHH</span>
+                      <span *ngSwitchCase="2">Aplicado</span>
+                      <span *ngSwitchDefault>Otro</span>
+                    </button>
                   </div>
                   <div *ngSwitchCase="'pago_Status'">
-                    <span [ngSwitch]="item[field]">
-                      <div *ngSwitchCase="0"><span class="badge badge-danger">Sin Cobrar</span></div>
-                      <div *ngSwitchCase="1"><span class="badge badge-success">Cobrado</span></div>
-                    </span>
+                    <div class="btn-group btn-group-sm">
+                      <button
+                        class="btn btn-sm"
+                        [ngClass]="{'btn-danger': item[field]==0, 'btn-success': item[field]==1}"
+                        style="font-size: smaller"
+                        type="button"
+                        [disabled]="chgLoading[item['id']]" >
+                        <span [ngSwitch]="item[field]">
+                          <div *ngSwitchCase="0"><span>Sin Cobrar</span></div>
+                          <div *ngSwitchCase="1"><span>Cobrado</span></div>
+                        </span>
+                        <i class="fa fa-fw fa-spinner fa-pulse" *ngIf="chgLoading[item['id']]"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm dropdown-toggle dropdown-toggle-split"
+                        [ngClass]="{'btn-danger': item[field]==0, 'btn-success': item[field]==1}"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false" style="font-size: smaller">
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <div class="dropdown-menu" style="font-size: smaller; cursor: pointer">
+                        <span [ngSwitch]="item[field]">
+                          <button class="dropdown-item text-danger"  style="font-size: small" type="button" (click)="chgStatus(item['id'], 0)" *ngSwitchCase="1">Sin Cobrar</button>
+                          <button class="dropdown-item text-success" style="font-size: small" type="button" (click)="chgStatus(item['id'], 1)" *ngSwitchCase="0">Cobrado</button>
+                        </span>
+
+                      </div>
+                    </div>
+
                   </div>
                   <div *ngSwitchCase="'tipo'">
-                    <span [ngSwitch]="item[field]">
-                      <div *ngSwitchCase="0"><span class="badge badge-warning">Responsabilidad</span></div>
-                      <div *ngSwitchCase="1"><span class="badge badge-info">Colaborador</span></div>
-                    </span>
+                    <button class="btn btn-sm" [ngClass]="{'btn-warning': item[field]==0, 'btn-info': item[field]==1}" style="font-size: smaller" [ngSwitch]="item[field]">
+                      <span *ngSwitchCase="0">Responsabilidad</span>
+                      <span *ngSwitchCase="1">Colaborador</span>
+                    </button>
                   </div>
                   <div *ngSwitchCase="'localizador'">
                     <span><a href="https://rsv.pricetravel.com.mx/reservations/show/{{ item[field] }}" target="_blank">{{ item[field] }}</a></span>
                   </div>
-                  <div *ngSwitchCase="'cxc_ID'">
+                  <div *ngSwitchCase="'pago_ID'">
                     <span class="text-center d-flex justify-content-between border-0"><span>{{ item[field] }}</span> <span><i class="text-primary fa fa-fw fa-external-link text-blue" style="cursor: pointer"></i></span></span>
+                  </div>
+                  <div *ngSwitchCase="'historic'">
+                    <button
+                    class="btn btn-sm btn-primary"
+                    style="font-size: smaller"
+                    (click)="showHisto(item['id'])"
+                    *ngIf="item[field]">
+                      {{ item[field] }} <i class="fa fa-fw fa-eye"></i>
+                    </button>
                   </div>
                   <div *ngSwitchCase="'asesor'">
                     <span>{{ item[field] | noAcentos }}</span>
@@ -66,9 +121,83 @@
         </tr>
       </tbody>
     </table>
-
-    <pre>
-      {{ dataCxcs | json }}
-    </pre>
   </ng-container>
 </div>
+
+<!-- Modal -->
+  <div class="modal fade" id="historiaCxc" tabindex="-1" role="dialog" aria-labelledby="historiaCxcLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="historiaCxcLabel">Historial de Movimientos</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-sm table-responsive-sm table-bordered table-striped table-hover" style="font-size: smaller" id='listCxc' *ngIf="listHisto">
+            <thead>
+              <tr>
+                <th class="text-center" scope="col" *ngFor="let field of listHisto[0] | keys">{{ field | capitalizado }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of listHisto; index as i">
+                <td *ngFor="let field of listHisto[0] | keys">{{ item[field] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal -->
+  <div class="modal fade" id="editCxc" tabindex="-1" role="dialog" aria-labelledby="editCxcLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editCxcLabel">Editar Monto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="container">
+            <form>
+              <div class="form-group row">
+                <label for="inputNewMonto" class="col-sm-2 col-form-label col-form-label-sm">Monto Nuevo</label>
+                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                  <div class="input-group-addon">$</div>
+                  <input type="number" min="0" step="0.01" (keyup)="calcSaldo()" (change)="calcSaldo()" class="form-control form-control-sm" id="inputNewMonto" placeholder="Nuevo Monto">
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label for="inputSaldo" class="col-sm-2 col-form-label col-form-label-sm">Saldo Pendiente</label>
+                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                  <div class="input-group-addon">$</div>
+                  <input type="number" min="0" step="0.01" [(ngModel)]="ammountSaldo" name="saldo" class="form-control form-control-sm" id="inputSaldo" placeholder="Saldo" readonly>
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label for="inputComments" class="col-sm-2 col-form-label col-form-label-sm">Comentarios</label>
+                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                  <div class="input-group-addon">$</div>
+                  <input type="text" name="saldo" class="form-control form-control-sm" id="inputComments" placeholder="Comentarios">
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" (click)="submitEdit()" [disabled]="ammountSaldo >= ammountEdit || ammountSaldo < 0 || editLoading">Guardar <i class="fa fa-fw fa-spinner fa-pulse" *ngIf="editLoading"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>

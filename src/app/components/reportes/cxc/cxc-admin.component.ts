@@ -8,6 +8,9 @@ import * as moment from 'moment';
 declare var jQuery:any;
 declare var Noty:any;
 
+import { saveAs } from 'file-saver';
+import { utils, write, WorkBook } from 'xlsx';
+
 import { ApiService } from '../../../services/api.service';
 import { InitService } from '../../../services/init.service';
 
@@ -80,9 +83,97 @@ export class CxcAdminComponent implements OnInit {
     console.log("Toaster", event)
   }
 
+  showMsgSuc( event ){
+    this.toastr.success(`${ event }`, `Guardado!`);
+    this._corte.build( this._corte.corte )
+  }
+
   showUploadModal( title, dir, fileName ){
     this._upImg.build( title, dir, fileName )
     jQuery('#formUploadImageComponent').modal('show')
   }
+
+  downloadXLS( id, title ){
+    this.toXls( id, title )
+
+  }
+
+  toXls( sheets, title ){
+
+    let wb = utils.table_to_book(document.getElementById(sheets), {raw: true});
+    // console.log(wb)
+
+    for(let index in wb.Sheets['Sheet1']){
+      if( index.match( /^[B-D,F-L]([1-9][0-9]+|[2-9])$/ )){
+        if( index.match( /^[A][0-9]+$/ ) ){
+          wb.Sheets['Sheet1'][index].v = wb.Sheets['Sheet1'][index].v.substr(1,100)
+        }else if( index.match( /^[I-L][0-9]+$/ ) ){
+          wb.Sheets['Sheet1'][index].v = wb.Sheets['Sheet1'][index].v.substr(1,100).replace(',','')
+        }else{
+          wb.Sheets['Sheet1'][index].v = wb.Sheets['Sheet1'][index].v.substr(0,100)
+        }
+        wb.Sheets['Sheet1'][index].t = 'n'
+      }
+    }
+
+
+    let wbout = write(wb, { bookType: 'xlsx', bookSST: true, type:
+'binary' });
+
+    // console.log(wb)
+
+    saveAs(new Blob([this.s2ab(wbout)], { type: 'application/octet-stream' }), `${title}.xlsx`)
+  }
+
+  s2ab(s) {
+    let buf = new ArrayBuffer(s.length);
+    let view = new Uint8Array(buf);
+    for (let i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+  }
+
+  changeStatusButton( row, col, status ){
+    let funcName:string
+
+    this._api.restfulPut( { col: col, status: status }, 'Cxc/chgStatus' )
+            .subscribe( res => {
+              if(res.ERR){
+                this.toastr.error( res.msg, 'Error!' )
+              }else{
+                this.getCortes()
+              }
+            })
+  }
+
+  statusChg( event ){
+
+    this.loadingBuilder( event.type, true, event.id )
+
+    this._api.restfulPut( { ids: event.id, status: event.status }, 'Cxc/chgStatus' )
+            .subscribe( res => {
+                this._corte.build( this._corte.corte )
+                this.loadingBuilder( event.type, false, event.id )
+
+            }, err => {
+              if(err){
+                let error = err.json()
+                this.toastr.error( error.msg, `Error ${err.status} - ${err.statusText}` )
+                this.loadingBuilder( event.type, false, event.id )
+              }
+            })
+  }
+
+  loadingBuilder( type, step, id? ){
+
+    switch ( type ){
+      case 'single':
+        this._corte.chgLoading[ id ] = step
+        break
+      case 'multi':
+        this._corte.chgLoading[ 0 ] = step
+        break
+    }
+  }
+
 
 }

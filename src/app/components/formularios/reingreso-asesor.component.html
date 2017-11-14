@@ -1,0 +1,210 @@
+<!-- Form Cambio Puesto -->
+        <form class="form-group" [formGroup]="formAddAsesor" (ngSubmit)="askCambio()">
+
+        <ng-container *ngFor="let item of asesorDetailsForm | keys" >
+            <div class="form-group row"  *ngIf="asesorDetailsForm[item].show">
+            <label class="col-4 col-form-label">{{ item | capitalizado }}</label>
+
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="{{ asesorDetailsForm[item].icon }}"></i>
+              </span>
+              <input
+                *ngIf="asesorDetailsForm[item].tipo=='date'"
+                daterangepicker
+                [formControlName]="item"
+                [options]="singlePicker"
+                (selected)="setVal($event.start, item)"
+                [ngClass]="{ 'is-invalid': !formAddAsesor.controls[item].valid && !formAddAsesor.controls[item].pristine }"
+                class="form-control uneditable-input" type="text" value="" [readonly]="asesorDetailsForm[item].readonly">
+              <input
+                *ngIf="asesorDetailsForm[item].tipo=='text'"
+                [formControlName]="item"
+                [ngClass]="{ 'is-invalid': !formAddAsesor.controls[item].valid && !formAddAsesor.controls[item].pristine }"
+                class="form-control" type="text" value="" [readonly]="asesorDetailsForm[item].readonly">
+              <select
+                      *ngIf="asesorDetailsForm[item].tipo=='select' && listProfileLoaded"
+                      class="custom-select" style="max-width: 257px; min-width: 257px;"
+                      [ngClass]="{ 'is-invalid': !formAddAsesor.controls[item].valid && !formAddAsesor.controls[item].pristine }"
+                      [formControlName]="item"
+                      >
+                <option value="">Selecciona...</option>
+                <option *ngFor="let k of listProfiles | keys" [value]="listProfiles[k]?.id">{{ listProfiles[k].name }}</option>
+              </select>
+              <select
+                      *ngIf="asesorDetailsForm[item].tipo=='select2' && listProfileLoaded"
+                      class="custom-select" style="max-width: 257px; min-width: 257px;"
+                      [ngClass]="{ 'is-invalid': !formAddAsesor.controls[item].valid && !formAddAsesor.controls[item].pristine }"
+                      [formControlName]="item"
+                      >
+                <option value="">Selecciona...</option>
+                <option *ngFor="let k of listContrato | keys" [value]="listContrato[k]?.id">{{ listContrato[k].name }}</option>
+              </select>
+            </div>
+            <div class="col-12 text-warning" *ngIf="formAddAsesor.controls[item].status == 'PENDING'">
+              <div><small><i class="fa fa-spinner fa-pulse fa-fw"></i>Validando nombre corto...</small></div>
+            </div>
+            <div class="col-12 text-danger" *ngIf="formAddAsesor.controls[item].errors?.existe && !formAddAsesor.controls[item].pristine">
+              <div><small>Ya existe este Nombre Corto / usuario registrado. Verificar con IT</small></div>
+            </div>
+            <div class="col-12 text-danger" *ngIf="formAddAsesor.controls[item].errors?.pattern && !formAddAsesor.controls[item].pristine">
+              <div><small [innerHTML]="asesorDetailsForm[item].pattern"></small></div>
+            </div>
+            <div class="col-12 text-danger" *ngIf="formAddAsesor.controls[item].errors?.required && !formAddAsesor.controls[item].pristine">
+              <div><small>Campo Obligatorio</small></div>
+            </div>
+          </div>
+        </ng-container>
+
+          <!-- Fecha Ingreso -->
+          <div class="form-group row">
+            <label class="col-4 col-form-label">Fecha de Re-Ingreso</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-calendar fa-fw"></i>
+              </span>
+              <input
+                daterangepicker
+                formControlName="fechaCambio"
+                [options]="singlePicker"
+                (selected)="setVal($event.start, 'fechaCambio')"
+                class="form-control uneditable-input" type="text" value="">
+            </div>
+          </div>
+
+          <!-- Ciudad -->
+          <div *ngIf="flagLoading['ciudad']">
+            <button type="button" class="btn btn-outline-primary btn-block" disabled><i class="fa fa-spinner fa-pulse fa-fw"></i> Cargando</button>
+          </div>
+          <div class="form-group row" *ngIf="formAddAsesor.controls['fechaCambio'].valid && flagExists['ciudad'] && !flagLoading['ciudad']">
+            <label class="col-4 col-form-label">Ciudad</label>
+            <div class="col-8 input-group">
+              <!-- <select #cPFciudad class="custom-select" id="form_cP_ciudad" ngModel name="ciudad" (ngModelChange)="puestoChange( cPFfecha.value, mainInput, 'ciudad', $event.id)"> -->
+              <span class="input-group-addon">
+                <i class="fa fa-map-marker fa-fw"></i>
+              </span>
+              <select class="custom-select" style="max-width: 257px; min-width: 257px;"
+                      formControlName="ciudad"
+                      >
+                <option value="">Selecciona...</option>
+                <option *ngFor="let ciudad of listOptions.ciudad" [value]="ciudad.id">{{ ciudad.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Oficina -->
+          <div *ngIf="flagLoading['oficina']">
+            <button type="button" class="btn btn-outline-primary btn-block" disabled><i class="fa fa-spinner fa-pulse fa-fw"></i> Cargando</button>
+          </div>
+          <div class="form-group row" *ngIf="formAddAsesor.controls['ciudad'].valid && flagExists['oficina'] && !flagLoading['oficina']">
+            <label class="col-4 col-form-label">Oficina</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-building-o fa-fw"></i>
+              </span>
+              <select class="custom-select" style="max-width: 257px; min-width: 257px;"
+                      formControlName="oficina"
+                      >
+                <option value="">Selecciona...</option>
+                <option *ngFor="let oficina of listOptions.oficina" [value]="oficina.id">{{ oficina.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Departamento -->
+          <div *ngIf="flagLoading['departamento']">
+            <button type="button" class="btn btn-outline-primary btn-block" disabled><i class="fa fa-spinner fa-pulse fa-fw"></i> Cargando</button>
+          </div>
+          <div class="form-group row" *ngIf="formAddAsesor.controls['ciudad'].valid && flagExists['departamento'] && !flagLoading['departamento']">
+            <label class="col-4 col-form-label">Departamento</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-users fa-fw"></i>
+              </span>
+              <select class="custom-select" style="max-width: 257px; min-width: 257px;"
+                      formControlName="departamento"
+                      >
+                <option value="">Selecciona...</option>
+                <option *ngFor="let departamento of listOptions.departamento" [value]="departamento.id">{{ departamento.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Puesto -->
+          <div *ngIf="flagLoading['puesto']">
+            <button type="button" class="btn btn-outline-primary btn-block" disabled><i class="fa fa-spinner fa-pulse fa-fw"></i> Cargando</button>
+          </div>
+          <div class="form-group row" *ngIf="formAddAsesor.controls['ciudad'].valid && flagExists['puesto'] && !flagLoading['puesto']">
+            <label class="col-4 col-form-label">Puesto</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-user fa-fw"></i>
+              </span>
+              <select class="custom-select" style="max-width: 257px; min-width: 257px;"
+                      formControlName="puesto"
+                      >
+                <option value="">Selecciona...</option>
+                <option *ngFor="let puesto of listOptions.puesto" [ngValue]="puesto.id">{{ puesto.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row" *ngIf="formAddAsesor.controls['puesto'].valid">
+            <label class="col-4 col-form-label">Salario Puesto</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-usd fa-fw"></i>
+              </span>
+              <input class="form-control uneditable-input"  type="text" [value]="formAddAsesor.controls['puesto'].value['salario']" readonly>
+            </div>
+          </div>
+          <div class="form-group row" [ngClass]="{ 'is-invalid': !formAddAsesor.controls['factor'].valid && !formAddAsesor.controls['factor'].pristine }" *ngIf="formAddAsesor.controls['puesto'].valid">
+            <label class="col-4 col-form-label">Factor Salarial</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-percent fa-fw"></i>
+              </span>
+              <input
+                    formControlName="factor"
+                    class="form-control"
+                    type="text">
+            </div>
+            <div class="col-12 invalid-feedback" *ngIf="formAddAsesor.controls['factor'].errors?.pattern">
+              <div><small>1 para 100% || de 0 a 1.99</small></div>
+            </div>
+            <div class="col-12 invalid-feedback" *ngIf="formAddAsesor.controls['factor'].errors?.required">
+              <div><small>Campo Obligatorio</small></div>
+            </div>
+          </div>
+          <div class="form-group row" *ngIf="formAddAsesor.controls['puesto'].valid">
+            <label class="col-4 col-form-label">Salario Establecido</label>
+            <div class="col-8 input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-usd fa-fw"></i>
+              </span>
+              <input class="form-control uneditable-input" type="text" id="salarioEstablecido" [value]="(formAddAsesor.controls['puesto'].value['salario']*formAddAsesor.controls['factor'].value)" readonly>
+            </div>
+          </div>
+
+
+          <div class="alert alert-danger" role="alert" *ngIf="saveAlert">
+            <span><strong>Hubo un error en el proceso</strong></span><br>
+            <span>
+              {{ errorMsg }}
+            </span><br>
+            <span>Por favor notifícalo a WFM</span>
+          </div>
+          <div class="d-flex flex-row-reverse">
+            <!-- <button
+                    type="button"
+                    [ngClass]="{ 'btn-outline-secondary': formAddAsesor.invalid, 'btn-success': !formAddAsesor.invalid }"
+                    class="btn"
+                    (click)="submit()">Enviar  <i class="fa fa-spinner fa-pulse fa-fw" *ngIf="retrieving"></i></button> -->
+            <button
+                    [disabled]="formAddAsesor.invalid || retrieving"
+                    type="button"
+                    [ngClass]="{ 'btn-outline-secondary': formAddAsesor.invalid, 'btn-success': !formAddAsesor.invalid }"
+                    class="btn"
+                    (click)="submit()">Enviar  <i class="fa fa-spinner fa-pulse fa-fw" *ngIf="retrieving"></i></button>
+          </div>
+
+        </form>

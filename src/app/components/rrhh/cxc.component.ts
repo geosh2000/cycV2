@@ -234,7 +234,6 @@ export class CxcComponent implements OnInit {
       }
     }
 
-    console.log(wb)
 
     let wbout = write(wb, { bookType: 'xlsx', bookSST: true, type:
 'binary' });

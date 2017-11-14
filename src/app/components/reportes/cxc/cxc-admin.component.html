@@ -17,26 +17,31 @@
       <br>
       <div class='container'>
         <div class="d-flex justify-content-start">
-          <select class="custom-select" (change)="selectedCorte( $event )">
-            <option value="" *ngIf="!listCortesFlag">Cargando... <i class="fa fa-fw fa-spinner fa-pulse"></i></option>
-            <ng-container *ngIf="listCortesFlag">
-              <option value="">Selecciona el corte a mostrar</option>
-              <option [value]="listCortes[item]['id']" *ngFor="let item of listCortes | keys">
-                {{ listCortes[item]['name'] }}
-              </option>
-            </ng-container>
-          </select>
+          <div class="form-group p-2">
+            <div class="col-sm-12 input-group">
+              <select class="custom-select" (change)="selectedCorte( $event )">
+                <option value="" *ngIf="!listCortesFlag">Cargando... <i class="fa fa-fw fa-spinner fa-pulse"></i></option>
+                <ng-container *ngIf="listCortesFlag">
+                  <option value="">Selecciona el corte a mostrar</option>
+                  <option [value]="listCortes[item]['id']" *ngFor="let item of listCortes | keys">
+                    {{ listCortes[item]['name'] }}
+                  </option>
+                </ng-container>
+              </select>
+            </div>
+          </div>
+          <div class="p-2 ml-auto">
+            <button type="button" class="btn btn-warning" *ngIf="_corte.dataCxcs" (click)="downloadXLS('listCxc', 'listCxc')">Descargar</button>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
-  <button type="button" class="btn btn-primary" (click)="showUploadModal('Subir Imagen CxC Firmado', 'cxc', 'test')">
-    Launch demo modal
-  </button>
-  <app-upload-image></app-upload-image>
   <div class="container-fluid">
-      <app-corte (msg)="showMsg( $event )"></app-corte>
+      <app-corte (msg)="showMsg( $event )" (success)="showMsgSuc( $event )" (statusChg)="statusChg( $event )"></app-corte>
   </div>
+
 
 
 </div>

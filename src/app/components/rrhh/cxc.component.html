@@ -201,7 +201,7 @@
       <div class="modal-body">
         <img alt='image' class='img rounded img-fluid' style='margin: auto;' [src]="documentImage" (error)="updateImg($event)" id="shownDocument">
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" *ngIf="_init.checkSingleCredential('cxc_delete')">
         <div class="d-flex justify-content-end">
           <div class='p-2'><button class="btn btn-danger" (click)="deleteImage()" [disabled]="deleting">Borrar <i class="fa fa-fw fa-trash"></i> <i class="fa fa-fw fa-spinner fa-pulse" *ngIf="deleting"></i></button></div>
         </div>

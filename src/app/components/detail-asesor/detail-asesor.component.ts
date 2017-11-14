@@ -20,6 +20,7 @@ import { Ng2SmartTableModule, LocalDataSource, ViewCell } from 'ng2-smart-table'
 
 import { ShowDetailAsesorComponent } from './show-detail-asesor.component';
 import { CambioPuestoComponent } from '../formularios/cambio-puesto.component';
+import { ReingresoAsesorComponent } from '../formularios/reingreso-asesor.component';
 import { EditDetailsComponent } from '../formularios/edit-details.component';
 import { SetBajaComponent } from '../formularios/set-baja.component';
 import { AgregarCxcComponent } from '../formularios/agregar-cxc.component';
@@ -40,6 +41,7 @@ export class DetailAsesorComponent implements OnInit {
 
   @ViewChild(ShowDetailAsesorComponent) detailAsesor:ShowDetailAsesorComponent
   @ViewChild(CambioPuestoComponent) cambioPuesto:CambioPuestoComponent
+  @ViewChild(ReingresoAsesorComponent) _reingreso:ReingresoAsesorComponent
   @ViewChild(EditDetailsComponent) editDetails:EditDetailsComponent
   @ViewChild(SetBajaComponent) setBaja:SetBajaComponent
   @ViewChild(AgregarCxcComponent) addCxc:AgregarCxcComponent
@@ -308,6 +310,9 @@ export class DetailAsesorComponent implements OnInit {
           break
         case 'askCambio':
           this.cambioPuesto.buildForm(array.extraValue, array.tipo)
+          break
+        case 'reingreso':
+          this._reingreso.buildForm( array.extraValue )
           break
         case 'addCxc':
           this.addCxc.buildForm(array.extraValue)

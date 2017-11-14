@@ -114,7 +114,7 @@ export class ShowDetailAsesorComponent implements OnInit {
     if(tipo == 1){
       type='set'
     }else{
-      type = 'ask'
+      type ='ask'
     }
     this.showDialog.emit({open: open, parent: parent, name: name, extraValue: extraValue, tipo: type})
   }

@@ -243,7 +243,27 @@
     <div class="contact-box col-md-5">
       <!-- Contratacion -->
       <div class="alert alert-info" role="alert">
-        <strong><i class="fa fa-fw fa-calendar"></i> Contratación</strong>
+        <div class="d-flex justify-content-end">
+          <div class="mr-auto p-2">
+            <p style="position:relative;
+                  top:50%;
+                  transform: translateY(-50%);
+                  -webkit-transform: translateY(-50%);
+                  -ms-transform: translateY(-50%);">
+              <strong><i class="fa fa-fw fa-calendar"></i> Contrato</strong>
+            </p>
+          </div>
+          <div class="p-2" *ngIf="asesor.status == 'Inactivo'">
+            <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning"
+                    *ngIf="_init.checkSingleCredential('hc_agregar_asesor')"
+                    (click)="showModal('#form_reIngreso', '#detailAsesor', 'reingreso', asesor)"
+            >
+              Reingreso
+            </button>
+          </div>
+        </div>
       </div>
       <table class="table">
         <thead class="thead-default">

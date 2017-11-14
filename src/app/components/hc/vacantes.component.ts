@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import 'rxjs/Rx';
 import { saveAs } from 'file-saver';
 import { utils, write, WorkBook } from 'xlsx';
+import * as Globals from '../../globals';
 
 // -- * START Credentials Init Settings
 import { Subscription } from 'rxjs/Subscription'
@@ -29,6 +30,8 @@ import { DeactivateVacanteComponent } from '../formularios/deactivate-vacante.co
   styles: [ "li { cursor: pointer }"  ]
 })
 export class VacantesComponent implements OnInit {
+
+  image:any = "/img/asesores/"
 
   // -- * START Credentials Init Settings
   tokenSubscription: Subscription
@@ -435,6 +438,10 @@ export class VacantesComponent implements OnInit {
       this.getVacantes()
     }
 
+  }
+
+  updateImg(event, index){
+    this.image = `${Globals.APISERV}/img/asesores/`
   }
 
 }

@@ -75,6 +75,7 @@ import { CorteComponent } from './components/reportes/cxc/corte.component';
 import { NoAcentosPipe } from './pipes/no-acentos.pipe';
 import { UploadImageComponent } from './components/formularios/upload-image.component';
 import { TableTemplateComponent } from './addon/table-template/table-template.component';
+import { ReingresoAsesorComponent } from './components/formularios/reingreso-asesor.component';
 
 
 declare let jQuery : Object;
@@ -132,7 +133,8 @@ declare let jQuery : Object;
     CorteComponent,
     NoAcentosPipe,
     UploadImageComponent,
-    TableTemplateComponent
+    TableTemplateComponent,
+    ReingresoAsesorComponent
   ],
   imports: [
     BrowserModule,

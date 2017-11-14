@@ -220,6 +220,7 @@
           <thead>
             <tr>
               <th>Action</th>
+              <th>Pic</th>
               <th *ngFor="let header of listHeaders">{{ header.replace('_',' ') }}</th>
             </tr>
           </thead>
@@ -235,6 +236,7 @@
                     <i class="fa fa-times fa-fw"></i>
                   </button>
                 </td>
+              <td scope="row"><img alt='image' class='img rounded img-fluid' style='margin: auto; cursor: zoom-in' src="{{ image }}{{listData[item]['num_colaborador']}}.jpg" (error)="updateImg(listData[item]['num_colaborador'])"></td>
               <th scope="row">{{ listData[item].id }}</th>
               <ng-container *ngFor="let header of listHeaders">
                 <td *ngIf="header != 'id'">{{ listData[item][header] }}</td>
