@@ -22,6 +22,8 @@ import { TestComponent } from './test/test/test.component';
 import { LiveTabComponent } from './components/monitors/venta/live-tab.component';
 import { AsistenciaComponent } from './components/reportes/asistencia/asistencia.component';
 import { CxcAdminComponent } from './components/reportes/cxc/cxc-admin.component';
+import { HxConfigComponent } from './components/config/horarios/hx-config.component';
+import { VentaPorCanalComponent } from './components/reportes/venta/venta-por-canal.component';
 
 const APP_ROUTES: Routes = [
   { path: '', component: HomeComponent },
@@ -55,6 +57,7 @@ const APP_ROUTES: Routes = [
   { path: 'precisionPronostico', component: PrecisionComponent },
   { path: 'precisionPorIntervalo', component: PorIntervaloComponent },
   { path: 'asistencia', component: AsistenciaComponent },
+  { path: 'mp/ventaPorCanal', component: VentaPorCanalComponent },
 
   //Bitacoras
   { path: 'bitacoraSupervisores', component: BitacoraSupersComponent },
@@ -72,6 +75,7 @@ const APP_ROUTES: Routes = [
   // Config
   { path: 'config/addExternal', component: AddExternalUserComponent },
   { path: 'config/chgSuper', component: ChangeSupervisorComponent },
+  { path: 'config/hxConfig', component: HxConfigComponent },
 
   // PDV
   { path: 'cambios-pdvs-asesores', component: CambioPdvComponent },

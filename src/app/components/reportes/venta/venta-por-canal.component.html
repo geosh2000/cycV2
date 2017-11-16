@@ -1,0 +1,99 @@
+<div class="showContents">
+
+  <div class="container-fluid">
+    <!-- TITLE -->
+    <div class="jumbotron jumbotron-fluid text-white blueBkg animated fadeIn">
+      <div class="container">
+        <div class="d-flex justify-content-between">
+          <div>
+            <span><h1 class="display-3">Reporte de Venta MP por Canal</h1></span>
+            <p class="lead">Ventas y modificaciones con saldo positivo por Canal. Incluye sólo cancelaciones del mismo día</p>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class='container'>
+        <div class="d-flex justify-content-start">
+          <div class="form-group p-2">
+              <div
+                  class="input-group"
+                  daterangepicker (selected)="dateChange($event.start, $event.end)">
+                  <input type='text' class="form-control uneditable-input"  name="daterange" value="" id="datepicker" style="font-size: smaller">
+                  <span class="input-group-btn">
+                      <button type="button" class="btn btn-secondary"><i class="fa fa-calendar fa-fw"></i></button>
+                  </span>
+              </div>
+          </div>
+          <div style="text-align: center" class="p-2">
+            <ui-switch
+              color="green"
+              size= "small"
+              [(ngModel)]="soloVenta"
+            ></ui-switch>
+            <p style="margin-top: -10px">
+              <small *ngIf="soloVenta">Solo Venta</small>
+              <small *ngIf="!soloVenta">Venta y Cxl</small>
+            </p>
+          </div>
+          <div style="text-align: center" class="p-2">
+            <ui-switch
+              color="green"
+              size= "small"
+              [(ngModel)]="pdvType"
+            ></ui-switch>
+            <p style="margin-top: -10px">
+              <small *ngIf="!pdvType">Por tipo (PDV)</small>
+              <small *ngIf="pdvType">Por canal (PDV)</small>
+            </p>
+          </div>
+          <div class="p-2">
+            <button type="button" class="btn btn-success" (click)="search()">Buscar</button>
+          </div>
+          <div class="p-2 ml-auto">
+            <button type="button" class="btn btn-warning" *ngIf="ventaData"  (click)="downloadXLS('ventaData', dwlTitle())">Descargar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid" >
+    <h2 *ngIf="loadingData"><i class="fa fa-fw fa-spinner fa-pulse"></i> Loading...</h2>
+      <table class="table table-sm table-responsive-sm table-bordered table-striped table-hover" style="font-size: smaller" id='ventaData' *ngIf="ventaData">
+        <thead>
+          <tr>
+            <th class="text-center" scope="col">Fecha</th>
+            <th class="text-center" scope="col">DOW</th>
+            <th class="text-center" scope="col">CC IN</th>
+            <th class="text-center" scope="col">PDV IN</th>
+            <th class="text-center" scope="col">CC OUT</th>
+            <th class="text-center" scope="col">.COM</th>
+            <th class="text-center" scope="col">Total .COM</th>
+            <th class="text-center" scope="col">Part % CC</th>
+            <th class="text-center" scope="col">Part % .COM</th>
+            <th class="text-center" scope="col">PDV</th>
+            <th class="text-center" scope="col">Total MP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of ventaData | keys">
+            <th class="text-center">{{ printDate( item, "YYYY-MM-DD" ) }}</th>
+            <td class="text-center">{{ printDate( item, 'dddd' ) }}</td>
+            <td class="text-center">{{ ventaData[item]['CC IN'] | currency:'MXN':'.2-2' }}</td>
+            <td class="text-center">{{ ventaData[item]['PDV IN'] | currency:'MXN':'.2-2' }}</td>
+            <td class="text-center">{{ ventaData[item]['CC OUT'] | currency:'MXN':'.2-2' }}</td>
+            <td class="text-center">{{ ventaData[item]['Online'] | currency:'MXN':'.2-2' }}</td>
+            <td class="text-center">{{ (ventaData[item]['CC IN'] + ventaData[item]['PDV IN'] + ventaData[item]['CC OUT'] + ventaData[item]['Online']) | currency:'MXN':'.2-2' }}</td>
+            <td class="text-center">{{ printFormated((ventaData[item]['CC IN'] + ventaData[item]['PDV IN'] + ventaData[item]['CC OUT']) / (ventaData[item]['CC IN'] + ventaData[item]['PDV IN'] + ventaData[item]['CC OUT'] + ventaData[item]['Online']) * 100) }}%</td>
+            <td class="text-center">{{ printFormated((ventaData[item]['Online']) / (ventaData[item]['CC IN'] + ventaData[item]['PDV IN'] + ventaData[item]['CC OUT'] + ventaData[item]['Online']) * 100) }}%</td>
+            <td class="text-center">{{ ventaData[item]['PDV Presencial'] | currency:'MXN':'.2-2' }}</td>
+            <td class="text-center">{{ (ventaData[item]['CC IN'] + ventaData[item]['PDV IN'] + ventaData[item]['CC OUT'] + ventaData[item]['Online'] + ventaData[item]['PDV Presencial']) | currency:'MXN':'.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+  </div>
+
+
+
+</div>

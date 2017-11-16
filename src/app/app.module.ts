@@ -10,6 +10,8 @@ import { CommonModule } from '@angular/common';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { FileUploadModule } from 'ng2-file-upload';
 import { PopoverModule } from 'ngx-popover';
+import { BootstrapSwitchModule } from 'angular2-bootstrap-switch';
+import { UiSwitchModule } from 'ngx-toggle-switch';
 
 //services
 import { NavbarService } from './services/navbar.service';
@@ -76,6 +78,8 @@ import { NoAcentosPipe } from './pipes/no-acentos.pipe';
 import { UploadImageComponent } from './components/formularios/upload-image.component';
 import { TableTemplateComponent } from './addon/table-template/table-template.component';
 import { ReingresoAsesorComponent } from './components/formularios/reingreso-asesor.component';
+import { HxConfigComponent } from './components/config/horarios/hx-config.component';
+import { VentaPorCanalComponent } from './components/reportes/venta/venta-por-canal.component';
 
 
 declare let jQuery : Object;
@@ -134,7 +138,9 @@ declare let jQuery : Object;
     NoAcentosPipe,
     UploadImageComponent,
     TableTemplateComponent,
-    ReingresoAsesorComponent
+    ReingresoAsesorComponent,
+    HxConfigComponent,
+    VentaPorCanalComponent
   ],
   imports: [
     BrowserModule,
@@ -149,7 +155,9 @@ declare let jQuery : Object;
     CommonModule,
     Ng2SmartTableModule,
     FileUploadModule,
-    PopoverModule
+    PopoverModule,
+    BootstrapSwitchModule.forRoot(),
+    UiSwitchModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: "esMX" },
